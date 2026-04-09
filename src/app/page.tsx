@@ -22,7 +22,14 @@ type HomePageProps = {
 };
 
 export default async function Home({ searchParams }: HomePageProps) {
-  const session = await getSession();
+  let session = null;
+
+  try {
+    session = await getSession();
+  } catch {
+    session = null;
+  }
+
   if (session) {
     redirect(session.role === "ADMIN" ? "/admin" : "/app");
   }
