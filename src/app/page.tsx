@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { GoogleLoginButton } from "@/components/google-login-button";
-import { getEnv, isGoogleConfigured } from "@/lib/env";
+import { getAppUrlFallback, isGoogleConfiguredSafe } from "@/lib/env";
 import { getSession } from "@/lib/session";
 
 const errorMessages: Record<string, string> = {
@@ -39,8 +39,8 @@ export default async function Home({ searchParams }: HomePageProps) {
     typeof resolvedSearchParams.error === "string"
       ? errorMessages[resolvedSearchParams.error] ?? "The request could not be completed."
       : null;
-  const env = getEnv();
-  const googleReady = isGoogleConfigured();
+  const appUrl = getAppUrlFallback();
+  const googleReady = isGoogleConfiguredSafe();
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 items-center px-6 py-8 sm:px-10 lg:py-12">
@@ -192,7 +192,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 
           {!googleReady ? (
             <p className="muted mt-4 text-sm leading-6">
-              Current app URL: <code>{env.APP_URL}</code>. Replace the Google
+              Current app URL: <code>{appUrl}</code>. Replace the Google
               OAuth values inside <code>.env</code> before testing the sign-in
               flow.
             </p>

@@ -52,6 +52,27 @@ export function isGoogleConfigured() {
   );
 }
 
+export function getAppUrlFallback() {
+  const appUrl = process.env.APP_URL;
+
+  if (!appUrl) {
+    return "http://localhost:3000";
+  }
+
+  try {
+    return new URL(appUrl).toString().replace(/\/$/, "");
+  } catch {
+    return "http://localhost:3000";
+  }
+}
+
+export function isGoogleConfiguredSafe() {
+  const clientId = process.env.GOOGLE_CLIENT_ID ?? "";
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET ?? "";
+
+  return clientId.length > 0 && !clientId.startsWith("change-me") && clientSecret !== "change-me";
+}
+
 export function resolveAppUrl(input?: Request | URL | string) {
   if (process.env.NODE_ENV === "production") {
     return getEnv().APP_URL;
