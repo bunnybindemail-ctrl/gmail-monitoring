@@ -53,6 +53,10 @@ export function isGoogleConfigured() {
 }
 
 export function resolveAppUrl(input?: Request | URL | string) {
+  if (process.env.NODE_ENV === "production") {
+    return getEnv().APP_URL;
+  }
+
   if (input instanceof Request) {
     return new URL(input.url).origin;
   }
