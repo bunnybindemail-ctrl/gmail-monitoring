@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id                    String       @id @default(cuid())
+  email                 String       @unique
+  name                  String?
+  role                  Role         @default(USER)
+  syncEnabled           Boolean      @default(true)
+  encryptedAccessToken  String
+  encryptedRefreshToken String?
+  accessTokenExpiresAt  DateTime?
+  gmailHistoryId        String?
+  lastSyncAttemptAt     DateTime?
+  lastEmailSyncAt       DateTime?
+  lastSyncError         String?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  emails                SyncedEmail[]
+}
+
+model SyncedEmail {
+  id             String   @id @default(cuid())
+  userId         String
+  mailboxEmail   String
+  gmailMessageId String
+  gmailThreadId  String
+  subject        String
+  sender         String
+  snippet        String
+  receivedAt     DateTime
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gmailMessageId])
+  @@index([userId, receivedAt])
+  @@index([mailboxEmail, receivedAt])
+}
+
+model AccountControl {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  loginEnabled Boolean  @default(true)
+  syncEnabled  Boolean  @default(true)
+  roleOverride Role?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

@@ -1,0 +1,70 @@
+services:
+  - type: web
+    name: gmail-monitoring-web
+    runtime: node
+    region: singapore
+    plan: free
+    buildCommand: npm install && npm run build
+    preDeployCommand: npx prisma db push --skip-generate
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: TOKEN_ENCRYPTION_KEY
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: CRON_SECRET
+        generateValue: true
+      - key: GMAIL_SYNC_BATCH_SIZE
+        value: "25"
+      - key: GMAIL_SYNC_DELAY_MS
+        value: "250"
+
+  - type: cron
+    name: gmail-monitoring-sync
+    runtime: node
+    region: singapore
+    schedule: "*/10 * * * *"
+    buildCommand: npm install
+    startCommand: npm run sync:emails
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: TOKEN_ENCRYPTION_KEY
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: CRON_SECRET
+        sync: false
+      - key: GMAIL_SYNC_BATCH_SIZE
+        value: "25"
+      - key: GMAIL_SYNC_DELAY_MS
+        value: "250"
